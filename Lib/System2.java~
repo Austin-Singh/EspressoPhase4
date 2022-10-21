@@ -1,0 +1,5 @@
+public class System2 {
+    Io2 out = new Io2();
+    Io2 in = new Io2();
+    static void exit() { java.lang.System.exit(1); }
+}

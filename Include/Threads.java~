@@ -1,0 +1,6 @@
+public abstract class Threads {
+    public Threads() { }
+    public abstract void run() ;
+    public final void start() { }
+    public void sleep(long millis) { }
+}

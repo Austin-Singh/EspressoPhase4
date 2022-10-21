@@ -1,0 +1,19 @@
+public class Math {
+    public static int min(int x, int y) {
+	return (x < y) ? x : y;
+    }
+
+    public static double abs(double x) {
+	return (x < 0) ? -1*x : x;
+    }
+
+
+    public static double round(double d) {
+	return (double)((int)d);
+    }
+
+    public static double sqrt(double d) {
+	return java.lang.Math.sqrt(d);
+    }
+
+}

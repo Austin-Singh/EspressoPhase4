@@ -1,0 +1,11 @@
+public class Threads extends Thread {
+    public void run() { }
+    public void start() {
+	super.start();
+    }
+    public static void sleep(long millis) {
+	try {
+	    super.sleep(millis);
+	} catch (Exception e) { }
+    }
+}

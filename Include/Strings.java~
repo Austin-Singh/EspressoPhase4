@@ -1,0 +1,3 @@
+public class Strings {
+    String toString(int x) { }
+}

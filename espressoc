@@ -1,0 +1,2 @@
+#!/bin/sh
+java -cp bin/:src/Utilities/java_cup_runtime.jar Espressoc -I Include/ -Ttype -P:4 $@

@@ -1,0 +1,2 @@
+#!/bin/sh
+curl -F file=@$1 http://web.cs.unlv.edu/matt/CSC460/Espresso/reference4.cgi
