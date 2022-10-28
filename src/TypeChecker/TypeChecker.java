@@ -328,8 +328,47 @@ public class TypeChecker extends Visitor {
 	}
 
 	    // YOUR CODE HERE
-
+	case AssignmentOp.PLUSEQ:
+	case AssignmentOp.MINUSEQ:
+	case AssignmentOp.MULTEQ:
+	case AssignmentOp.DIVEQ:
+	case AssignmentOp.MODEQ: {
+		if(!vType.isNumericType()) {
+			Error.error(as, "Left hand side must be numeric.");
+		}
+		if(!eType.isNumericType()) {
+			Error.error(as, "Right hand side must be numeric.");
+		}
+		if(!Type.assignmentCompatible(vType, eType)) {
+			Error.error(as, "Cannot assign value of type " + eType.typeName() + " to variable of type " + vType.typeName() + ".");
+		}
+		break;
 	}
+	
+	case AssignmentOp.RSHIFT:
+	case AssignmentOp.LSHIFT:
+	case AssignmentOp.RRSHIFT: {
+		if(!vType.isIntegralType()) {
+			Error.error(as, "Left hand side must be integer.");
+		}
+		if(!eType.isIntegralType()) {
+			Error.error(as, "Right hand side must be integer.");
+		}
+		break;
+	}
+	
+	case AssignmentOp.ANDEQ:
+	case AssignmentOp.OREQ:
+	case AssignmentOp.XOREQ: {
+		if(!eType.isIntegralType() || !vType.isIntegerType()) {
+			if(!eType.isBooleanType() || !vType.isBooleanType()) {
+				Error.error(as, "Both sides must be either integer or boolean.");
+			}
+		}
+		break;
+	}
+	}
+	
 	as.type = vType;
 	println(as.line + ": Assignment has type: " + as.type);
 
