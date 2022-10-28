@@ -529,11 +529,13 @@ public class TypeChecker extends Visitor {
 		return null;
     }
 
-    /** CLASS DECLARATION - OUR CODE HERE (STILL TO COMPLETE) */
+    /** CLASS DECLARATION - OUR CODE HERE (FINISHED?) */
     public Object visitClassDecl(ClassDecl cd) {
 		println(cd.line + ": Visiting a class declaration");
 
 		// INSERT CODE HERE
+		super.visitClassDecl(cd);
+		// - END -
 
 		return null;
     }
@@ -543,7 +545,6 @@ public class TypeChecker extends Visitor {
 		println(cd.line + ": Visiting a constructor declaration");
 
 		// INSERT CODE HERE
-		currentContext = cd;
 		super.visitConstructorDecl(cd);
 		// - END -
 
@@ -611,7 +612,7 @@ public class TypeChecker extends Visitor {
 		currentContext = md;
 
 		// INSERT CODE HERE
-		super.visitMethodDecl(this);
+		super.visitMethodDecl(md);
 		// - END -
 
 		return null;
@@ -642,6 +643,8 @@ public class TypeChecker extends Visitor {
 		println(si.line + ": Visiting a static initializer");
 
 		// INSERT CODE HERE
+		super.visitStaticInitDecl(si);
+		// - END -
 
 		return null;
     }
