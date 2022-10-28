@@ -550,11 +550,19 @@ public class TypeChecker extends Visitor {
 		return null;
     }
 
-    /** DO STATEMENT - OUR CODE HERE (STILL TO COMPLETE) */
+    /** DO STATEMENT - OUR CODE HERE (FINISHED) */
     public Object visitDoStat(DoStat ds) {
 		println(ds.line + ": Visiting a do statement");
 
 		// INSERT CODE HERE
+		Type exprType = (Type)ds.expr().visit(this);
+		
+		if(!exprType.isBooleanType()) {
+			Error.error(ds, "Do statement must have boolean expression.");
+		}
+		
+		ds.stat().visit(this);
+		// - END -
 
 		return null;
     }
