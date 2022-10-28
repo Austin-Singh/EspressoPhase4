@@ -294,7 +294,7 @@ public class TypeChecker extends Visitor {
 		inFieldInit = true;
 		currentFieldDecl = fd;
 		if (fd.var().init() != null)
-			fd.var().init().visit(this);
+			fd.var().visit(this);
 		currentFieldDecl = null;
 		inFieldInit = false;
 		return fd.type();
@@ -605,12 +605,14 @@ public class TypeChecker extends Visitor {
 		return li.type;
     }
 
-    /** METHOD DECLARATION - OUR CODE HERE (STILL TO COMPLETE) */
+    /** METHOD DECLARATION - OUR CODE HERE (FINISHED) */
     public Object visitMethodDecl(MethodDecl md) {
 		println(md.line + ": Visiting a method declaration");
 		currentContext = md;
 
 		// INSERT CODE HERE
+		super.visitMethodDecl(this);
+		// - END -
 
 		return null;
     }
