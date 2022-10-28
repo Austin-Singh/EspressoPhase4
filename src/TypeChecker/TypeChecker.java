@@ -431,7 +431,7 @@ public class TypeChecker extends Visitor {
 		return ne.type;
     }
 
-    /** ASSIGNMENT - OUR CODE HERE (COMPLETE?) */
+    /** ASSIGNMENT - OUR CODE HERE (FINISHED) */
     public Object visitAssignment(Assignment as) {
 		println(as.line + ": Visiting an assignment");
 
@@ -460,6 +460,7 @@ public class TypeChecker extends Visitor {
 			Error.error(as,"Cannot assign value of type " + eType.typeName() + " to variable of type " + vType.typeName() + ".");
 			break;
 		}
+
 		// INSERT CODE HERE
 		case AssignmentOp.PLUSEQ:
 		case AssignmentOp.MINUSEQ:
@@ -489,6 +490,8 @@ public class TypeChecker extends Visitor {
 			}
 			break;			
 		}
+		// - END -
+
 		}
 
 		as.type = vType;
@@ -535,13 +538,14 @@ public class TypeChecker extends Visitor {
 		return null;
     }
 
-    /** CONSTRUCTOR DECLARATION - OUR CODE HERE (STILL TO COMPLETE) */
+    /** CONSTRUCTOR DECLARATION - OUR CODE HERE (FINISHED) */
     public Object visitConstructorDecl(ConstructorDecl cd) {
 		println(cd.line + ": Visiting a constructor declaration");
 
 		// INSERT CODE HERE
 		currentContext = cd;
 		super.visitConstructorDecl(cd);
+		// - END -
 
 		return null;
     }
