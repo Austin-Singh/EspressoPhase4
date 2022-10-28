@@ -327,7 +327,7 @@ public class TypeChecker extends Visitor {
 	    break;
 	}
 
-	    // YOUR CODE HERE
+	    // YOUR CODE HERE -- COMPLETE
 	case AssignmentOp.PLUSEQ:
 	case AssignmentOp.MINUSEQ:
 	case AssignmentOp.MULTEQ:
@@ -425,7 +425,10 @@ public class TypeChecker extends Visitor {
     public Object visitConstructorDecl(ConstructorDecl cd) {
 	println(cd.line + ": Visiting a constructor declaration");
 
-	// YOUR CODE HERE
+	// YOUR CODE HERE -- COMPLETE
+	currentContext = cd;
+	
+	super.visitConstructorDecl(cd, arg);
 
 	return null;
     }
@@ -448,7 +451,7 @@ public class TypeChecker extends Visitor {
 	inFieldInit = true;
 	currentFieldDecl = fd;
 	if (fd.var().init() != null)
-	    fd.var().init().visit(this);
+	    fd.var().visit(this);
 	currentFieldDecl = null;
 	inFieldInit = false;
 	return fd.type();
