@@ -545,6 +545,7 @@ public class TypeChecker extends Visitor {
 		println(cd.line + ": Visiting a constructor declaration");
 
 		// INSERT CODE HERE
+		currentContext = cd;
 		super.visitConstructorDecl(cd);
 		// - END -
 
@@ -568,20 +569,50 @@ public class TypeChecker extends Visitor {
 		return null;
     }
 
-    /** FOR STATEMENT - OUR CODE HERE (STILL TO COMPLETE) */
+    /** FOR STATEMENT - OUR CODE HERE (COMPLETE) */
     public Object visitForStat(ForStat fs) {
 		println(fs.line + ": Visiting a for statement");
 
 		// INSERT CODE HERE
+		if(fs.init() != null) {
+			fs.init().visit(this);
+		}
+		
+		if(fs.expr() != null) {
+			Type exprType = (Type)fs.expr().visit(this);
+			if(!exprType.isBooleanType()) {
+				Error.error(fs, "For statement must have boolean expression.");
+			}
+		}
+		
+		if(fs.incr() != null) {
+			fs.incr().visit(this);
+		}
+		
+		if(fs.stats() != null) {
+			fs.stats().visit(this);
+		}
 
 		return null;
     }
 
-    /** IF STATEMENT - OUR CODE HERE (STILL TO COMPLETE) */
+    /** IF STATEMENT - OUR CODE HERE (COMPLETE) */
     public Object visitIfStat(IfStat is) {
 		println(is.line + ": Visiting a if statement");
 
 		// INSERT CODE HERE
+		Type exprType = (Type)is.expr().visit(this);
+		if(!exprType.isBooleanType()) {
+			Error.error(is, "If statement must have boolean expression.");
+		}
+		
+		if(is.thenpart() != null) {
+			is.thenpart().visit(this);
+		}
+		
+		if(is.elsepart() != null) {
+			is.elsepart().visit(this);
+		}
 
 		return null;
     }
@@ -601,6 +632,7 @@ public class TypeChecker extends Visitor {
 		println(li.line + ": Visiting a literal");
 
 		// INSERT CODE HERE
+		if()
 
 		println(li.line + ": Literal has type: " + li.type);
 		return li.type;
@@ -638,11 +670,12 @@ public class TypeChecker extends Visitor {
 		return ne.type;
     }
 
-    /** STATIC INITIALIZER - OUR CODE HERE (STILL TO COMPLETE) */
+    /** STATIC INITIALIZER - OUR CODE HERE (COMPLETE) */
     public Object visitStaticInitDecl(StaticInitDecl si) {
 		println(si.line + ": Visiting a static initializer");
 
 		// INSERT CODE HERE
+		currentContext = si;
 		super.visitStaticInitDecl(si);
 		// - END -
 
@@ -707,11 +740,19 @@ public class TypeChecker extends Visitor {
 		return null;
     }
 
-    /** WHILE STATEMENT - OUR CODE HERE (STILL TO COMPLETE) */
+    /** WHILE STATEMENT - OUR CODE HERE (COMPLETE) */
     public Object visitWhileStat(WhileStat ws) {
 		println(ws.line + ": Visiting a while statement"); 
 
 		// INSERT CODE HERE
+		Type exprType = (Type)ws.expr().visit(this);
+		
+		if(!exprType.isBooleanType()) {
+			Error.error(ds, "While statement must have boolean expression.");
+		}
+		
+		ws.stat().visit(this);
+		// - END -
 
 		return null;
     }
