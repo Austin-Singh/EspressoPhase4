@@ -632,7 +632,6 @@ public class TypeChecker extends Visitor {
 		println(li.line + ": Visiting a literal");
 
 		// INSERT CODE HERE
-		if()
 
 		println(li.line + ": Literal has type: " + li.type);
 		return li.type;
@@ -748,7 +747,7 @@ public class TypeChecker extends Visitor {
 		Type exprType = (Type)ws.expr().visit(this);
 		
 		if(!exprType.isBooleanType()) {
-			Error.error(ds, "While statement must have boolean expression.");
+			Error.error(ws, "While statement must have boolean expression.");
 		}
 		
 		ws.stat().visit(this);
