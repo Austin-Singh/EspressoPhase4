@@ -500,11 +500,125 @@ public class TypeChecker extends Visitor {
 		return vType;
     }
 
-    /** BINARY EXPRESSION - OUR CODE HERE (STILL TO COMPLETE) */
+    /** BINARY EXPRESSION - OUR CODE HERE (COMPLETE) */
     public Object visitBinaryExpr(BinaryExpr be) {
 		println(be.line + ": Visiting a Binary Expression");
 
 		// INSERT CODE HERE
+		Type lType = (Type)be.left().visit(this);
+		Type rType = (Type)be.right().visit(this);
+		
+		switch(be.op().kind) {
+		case BinOp.LT:
+		case BinOp.GT:
+		case BinOp.LTEQ:
+		case BinOp.GTEQ: {
+			if(lType.isNumericType() && rType.isNumericType()) {
+				be.type = new PrimitiveType(PrimitiveType.BooleanKind);
+			}
+			else {
+				Error.error(be, "Operands for " + be.op().operator() + " must be numeric.");
+			}
+			break;
+		}
+		case BinOp.EQEQ:
+		case BinOp.NOTEQ: {
+			if(be.left() instanceof NameExpr) {
+				if(((NameExpr)be.left()).myDecl instanceof ClassDecl) {
+					Error.error(be, "Left hand side of " + be.op().operator() + " cannot be class name.");
+				}
+			}
+			
+			if(be.right() instanceof NameExpr) {
+				if(((NameExpr)be.right()).myDecl instanceof ClassDecl) {
+					Error.error(be, "Right hand side of " + be.op().operator() + " cannot be class name.");
+				}
+			}
+			
+			if(lType.identical(rType)) {
+				if(!lType.isVoidType()) {
+					be.type = new PrimitiveType(PrimitiveType.BooleanKind);
+				}
+				else {
+					Error.error(be, "Operands for " + be.op().operator() + " cannot be void.");
+				}
+			}
+			else if (lType.isNumericType() && rType.isNumericType()) {
+				be.type = new PrimitiveType(PrimitiveType.BooleanKind);
+			}
+			else {
+				Error.error(be, "Operands for " + be.op().operator() + " must be identical or numeric.");
+			}
+			break;
+		}
+		case BinOp.ANDAND:
+		case BinOp.OROR: {
+			if(lType.isBooleanType() && rType.isBooleanType()) {
+				be.type = new PrimitiveType(PrimitiveType.BooleanKind);
+			}
+			else {
+				Error.error(be, "Operands for " + be.op().operator() + " must both be boolean.");
+			}
+			break;
+		}
+		case BinOp.AND:
+		case BinOp.OR:
+		case BinOp.XOR: {
+			if(lType.isBooleanType() && rType.isBooleanType()) {
+				be.type = new PrimitiveType(PrimitiveType.BooleanKind);
+			}
+			else if (lType.isIntegralType() && rType.isIntegralType()) {
+				be.type = new PrimitiveType(PrimitiveType.ceiling((PrimitiveType)lType, (PrimitiveType)rType));
+			}
+			else {
+				Error.error(be, "Operands for " + be.op().operator() + " must be either boolean or integrals.");
+			}
+			break;
+		}
+		case BinOp.PLUS:
+		case BinOp.MINUS:
+		case BinOp.MOD:
+		case BinOp.MULT:
+		case BinOp.DIV: {
+			if(lType.isNumericType() && rType.isNumericType()) {
+				be.type = new PrimitiveType(PrimitiveType.ceiling((PrimitiveType)lType, (PrimitiveType)rType));
+			}
+			else if (be.op().kind == BinOp.PLUS) {
+				if(lType.isStringType() || rType.isStringType()) {
+					be.type = new PrimitiveType(PrimitiveType.StringKind);
+				}
+			}
+			else {
+				Error.error(be, "Operands for " + be.op().operator() + " must be numeric.");
+			}
+			break;
+		}
+		case BinOp.LSHIFT:
+		case BinOp.RSHIFT:
+		case BinOp.RRSHIFT: {
+			if(lType.isIntegralType() && rType.isIntegralType()) {
+				be.type = lType;
+			}
+			else {
+				Error.error(be, "Operands for " + be.op().operator() + " must be integrals.");
+			}
+			//if lType == byte, short, or char => change it to int? Nothing tests this? Unsure what he means. Be aware for testing phase.
+			break;
+		}
+		case BinOp.INSTANCEOF: {
+			if(classTable.get(((NameExpr)be.right()).name().getname()) == null) {
+				Error.error(be, "Right side of " + be.op().operator() + " must be a class name.");
+			}
+			
+			if(!lType.isClassType()) {
+				Error.error(be, "Left side of " + be.op().operator() + " must be a class type.");
+			}
+			
+			be.type = new PrimitiveType(PrimitiveType.BooleanKind);
+			break;
+			}
+		}
+		// - END -
 
 		println(be.line + ": Binary Expression has type: " + be.type);
 		return be.type;
