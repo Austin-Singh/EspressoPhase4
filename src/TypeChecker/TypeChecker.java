@@ -741,11 +741,18 @@ public class TypeChecker extends Visitor {
 		return in.type;
     }
 
-    /** LITERAL - OUR CODE HERE (STILL TO COMPLETE) */
+    /** LITERAL - OUR CODE HERE (COMPLETE) */
     public Object visitLiteral(Literal li) {
 		println(li.line + ": Visiting a literal");
 
 		// INSERT CODE HERE
+		if(li.getKind() == Literal.NullKind) {
+			li.type = new NullType(li);
+		}
+		else {
+			li.type = new PrimitiveType(li.getKind());
+		}
+		// - END -
 
 		println(li.line + ": Literal has type: " + li.type);
 		return li.type;
@@ -818,6 +825,19 @@ public class TypeChecker extends Visitor {
 		println(te.line + ": Visiting a ternary expression");
 
 		// INSERT CODE HERE
+		Type exprType = (Type)te.expr().visit(this);
+		Type trueExprType = (Type)te.trueBranch().visit(this);
+		Type falseExprType = (Type)te.falseBranch().visit(this);
+		
+		if(!exprType.isBooleanType()) {
+			Error.error(te, "Ternary expression must have boolean expression.");
+		}
+		else if(!falseExprType.identical(trueExprType)) {
+			Error.error(te, "Ternary expression must have identical return types.");
+		}
+		
+		te.type = falseExprType;
+		// - END -
 
 		println(te.line + ": Ternary has type: " + te.type);
 		return te.type;
