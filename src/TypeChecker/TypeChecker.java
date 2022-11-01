@@ -802,11 +802,18 @@ public class TypeChecker extends Visitor {
 		return null;
     }
 
-    /** SUPER - OUR CODE HERE (STILL TO COMPLETE) */
+    /** SUPER - OUR CODE HERE (COMPLETE) */
     public Object visitSuper(Super su) {
 		println(su.line + ": Visiting a super");
 
 		// INSERT CODE HERE
+		if(currentClass.superClass() == null) {
+			Error.error(su, "Super called on class with no super class.");
+		}
+		else {
+			su.type = currentClass.superClass();
+		}
+		// - END -
 
 		return su.type;
     }
@@ -820,7 +827,7 @@ public class TypeChecker extends Visitor {
 		return null;
     }
 
-    /** TERNARY EXPRESSION - OUR CODE HERE (STILL TO COMPLETE) */
+    /** TERNARY EXPRESSION - OUR CODE HERE (COMPLETE) */
     public Object visitTernary(Ternary te) {
 		println(te.line + ": Visiting a ternary expression");
 
@@ -864,11 +871,19 @@ public class TypeChecker extends Visitor {
 		return up.type;
     }
 
-    /** VAR - OUR CODE HERE (STILL TO COMPLETE) */
+    /** VAR - OUR CODE HERE (COMPLETE) */
     public Object visitVar(Var va) {
 		println(va.line + ": Visiting a var");
 
 		// INSERT CODE HERE
+		if(va.init() != null) {
+			Type varType = (Type)va.myDecl.type();
+			Type initType = (Type)va.init().visit(this);
+			if(!Type.assignmentCompatible(varType, initType)) {
+				Error.error(va, "This type cannot be assigned to this variable.");
+			}
+		}
+		// - END -
 
 		return null;
     }
