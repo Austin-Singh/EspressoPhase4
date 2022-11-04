@@ -431,7 +431,7 @@ public class TypeChecker extends Visitor {
 		return ne.type;
     }
 
-    /** ASSIGNMENT - OUR CODE HERE (FINISHED) */
+    /** ASSIGNMENT - OUR CODE HERE (COMPLETE) */
     public Object visitAssignment(Assignment as) {
 		println(as.line + ": Visiting an assignment");
 
@@ -643,7 +643,7 @@ public class TypeChecker extends Visitor {
 		return null;
     }
 
-    /** CLASS DECLARATION - OUR CODE HERE (FINISHED?) */
+    /** CLASS DECLARATION - OUR CODE HERE (COMPLETE?) */
     public Object visitClassDecl(ClassDecl cd) {
 		println(cd.line + ": Visiting a class declaration");
 
@@ -654,7 +654,7 @@ public class TypeChecker extends Visitor {
 		return null;
     }
 
-    /** CONSTRUCTOR DECLARATION - OUR CODE HERE (FINISHED) */
+    /** CONSTRUCTOR DECLARATION - OUR CODE HERE (COMPLETE) */
     public Object visitConstructorDecl(ConstructorDecl cd) {
 		println(cd.line + ": Visiting a constructor declaration");
 
@@ -666,7 +666,7 @@ public class TypeChecker extends Visitor {
 		return null;
     }
 
-    /** DO STATEMENT - OUR CODE HERE (FINISHED) */
+    /** DO STATEMENT - OUR CODE HERE (COMPLETE) */
     public Object visitDoStat(DoStat ds) {
 		println(ds.line + ": Visiting a do statement");
 
@@ -758,7 +758,7 @@ public class TypeChecker extends Visitor {
 		return li.type;
     }
 
-    /** METHOD DECLARATION - OUR CODE HERE (FINISHED) */
+    /** METHOD DECLARATION - OUR CODE HERE (COMPLETE) */
     public Object visitMethodDecl(MethodDecl md) {
 		println(md.line + ": Visiting a method declaration");
 		currentContext = md;
@@ -770,11 +770,25 @@ public class TypeChecker extends Visitor {
 		return null;
     }
 
-    /** NAME EXPRESSION - OUR CODE HERE (STILL TO COMPLETE) */
+    /** NAME EXPRESSION - OUR CODE HERE (COMPLETE) */
     public Object visitNameExpr(NameExpr ne) {
 		println(ne.line + ": Visiting a Name Expression");
 
 		// INSERT CODE HERE
+		if(ne.myDecl instanceof ParamDecl || ne.myDecl instanceof LocalDecl) {
+			ne.type = ((VarDecl)ne.myDecl).type();
+		}
+		else if (ne.myDecl instanceof FieldDecl) {
+			ne.type = ((FieldDecl)ne.myDecl).type();
+		}
+		else if (ne.myDecl instanceof ClassDecl) {
+			ne.type = new ClassType(((ClassDecl)ne.myDecl).className());
+			((ClassType)ne.type).myDecl = (ClassDecl)ne.myDecl;
+		}
+		else {
+			Error.error(ne, "Name expression must be local, param, field, or class.");
+		}
+		//- END -
 
 		println(ne.line + ": Name Expression has type: " + ne.type);
 		return ne.type;
@@ -850,22 +864,60 @@ public class TypeChecker extends Visitor {
 		return te.type;
     }
 
-    /** UNARY POST EXPRESSION - OUR CODE HERE (STILL TO COMPLETE) */
+    /** UNARY POST EXPRESSION - OUR CODE HERE (COMPLETE) */
     public Object visitUnaryPostExpr(UnaryPostExpr up) {
 		println(up.line + ": Visiting a unary post expression");
 		Type eType = null;
 
 		// INSERT CODE HERE
+		eType = (Type)up.expr().visit(this);
+		
+		if(!(up.expr() instanceof FieldRef) && !(up.expr() instanceof NameExpr)) {
+			Error.error(up, "Unary post expression must be a variable.");
+		}
+		
+		if(!eType.isIntegralType() && !eType.isDoubleType() && !eType.isFloatType()) {
+			Error.error(up, "Unary post expression cannot be of type " + eType.typeName() + ".");
+		}
+		
+		up.type = eType;
+		// - END -
 
 		println(up.line + ": Unary Post Expression has type: " + up.type);
 		return eType;
     }
 
-    /** UNARY PRE EXPRESSION - OUR CODE HERE (STILL TO COMPLETE) */
+    /** UNARY PRE EXPRESSION - OUR CODE HERE (COMPLETE) */
     public Object visitUnaryPreExpr(UnaryPreExpr up) {
 		println(up.line + ": Visiting a unary pre expression");
 
 		// INSERT CODE HERE
+		Type eType = (Type)up.expr().visit(this);
+		
+		if(up.op().getKind() == PreOp.PLUS || up.op().getKind() == PreOp.MINUS) {
+			if(!eType.isNumericType()) {
+				Error.error(up, "Cannot apply unary +/- to " + eType.typeName() + ".");
+			}
+		}
+		
+		if(up.op().getKind() == PreOp.NOT) {
+			if(!eType.isBooleanType()) {
+				Error.error(up, "Cannot apply ! to " + eType.typeName() + ".");
+			}
+		}
+		
+		if(up.op().getKind() == PreOp.PLUSPLUS || up.op().getKind() == PreOp.MINUSMINUS) {
+			if(!(up.expr() instanceof FieldRef) && !(up.expr() instanceof NameExpr)) {
+				Error.error(up, "Unary pre expression for ++/-- must be a variable.");
+			}
+			
+			if(!eType.isIntegralType() && !eType.isDoubleType() && !eType.isFloatType()) {
+				Error.error(up, "Unary pre expression for ++/-- cannot be of type " + eType.typeName() + ".");
+			}
+		}
+		
+		up.type = eType;
+		// - END -
 
 		println(up.line + ": Unary Pre Expression has type: " + up.type);
 		return up.type;
