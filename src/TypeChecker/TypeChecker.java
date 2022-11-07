@@ -593,7 +593,7 @@ public class TypeChecker extends Visitor {
 
     /** CLASS DECLARATION - OUR CODE HERE (FINISHED) */
     public Object visitClassDecl(ClassDecl cd) {
-		println(cd.line + ": Visiting a class declaration");
+		println(cd.line + ": Visiting a class declaration "+ cd.name());
 
 		// INSERT CODE HERE
 		currentClass = cd;
@@ -697,7 +697,9 @@ public class TypeChecker extends Visitor {
 
     /** LITERAL - OUR CODE HERE (FINISHED) */
     public Object visitLiteral(Literal li) {
-		println(li.line + ": Visiting a literal");
+
+
+		println(li.line + ": Visiting a literal (" + li.toString().substring(li.toString().indexOf("= ") + 2) + ")");
 
 		// INSERT CODE HERE
 		if(li.getKind() == Literal.NullKind) {
