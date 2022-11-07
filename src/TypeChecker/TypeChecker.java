@@ -596,6 +596,22 @@ public class TypeChecker extends Visitor {
 		println(cd.line + ": Visiting a class declaration");
 
 		// INSERT CODE HERE
+		currentClass = cd;
+		for (int i = 0; i < cd.interfaces().nchildren; i++ ){
+			for (int j = i+1; j < cd.interfaces().nchildren; j++){
+
+				String ct1 = ((ClassType)cd.interfaces().children[i]).name().getname();
+				String ct2 = ((ClassType)cd.interfaces().children[j]).name().getname();
+
+				if ( ct1.equals(ct2) ){
+
+					Error.error("Duplicate interface" + ((ClassType)cd.interfaces().children[i]).name());
+
+				}
+
+			}
+		}
+
 		super.visitClassDecl(cd);
 		// - END -
 
