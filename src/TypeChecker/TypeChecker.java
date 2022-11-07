@@ -233,7 +233,6 @@ public class TypeChecker extends Visitor {
 		return at;
     }
 
-    // TODO: Espresso doesn't allow 'int[][] a = new int[]{ f(), f() }} where f returns an array
     public boolean arrayAssignmentCompatible(Type t, Expression e) {
 		if (t instanceof ArrayType && (e instanceof ArrayLiteral)) {
 			ArrayType at = (ArrayType)t;
@@ -399,39 +398,7 @@ public class TypeChecker extends Visitor {
 		return th.type;
     }
 
-    /** ArrayAccessExpr - OUR CODE HERE (STILL TO COMPLETE) */
-    public Object visitArrayAccessExpr(ArrayAccessExpr ae) {
-		println(ae.line + ": Visiting ArrayAccessExpr");
-		// INSERT CODE HERE
-		/**
-			Example)
-			array[0]
-
-			We can check the ArrayAccessExpr.java file and find two paramters (Expression target, Expression index)
-			target[index]
-			- target must be an arrayType
-			- index must be integralType (int, long)
-
-			array's type:
-				if depth == 1	--> base type
-				else 			--> new array type w/ base type of target, but depth ONE less
-		 */
-		return ae.type;
-    }
-
-    /** NewArray - OUR CODE HERE (STILL TO COMPLETE) */
-    public Object visitNewArray(NewArray ne) {
-		println(ne.line + ": Visiting a NewArray " + ne.dimsExpr().nchildren + " " + ne.dims().nchildren);
-		// INSERT CODE HERE
-		/**
-			Example)
-
-		 */
-		println(ne.line + ": NewArray type is " + ne.type);
-		return ne.type;
-    }
-
-    /** ASSIGNMENT - OUR CODE HERE (COMPLETE) */
+    /** ASSIGNMENT - OUR CODE HERE (FINISHED) */
     public Object visitAssignment(Assignment as) {
 		println(as.line + ": Visiting an assignment");
 
@@ -500,7 +467,7 @@ public class TypeChecker extends Visitor {
 		return vType;
     }
 
-    /** BINARY EXPRESSION - OUR CODE HERE (COMPLETE) */
+    /** BINARY EXPRESSION - OUR CODE HERE (FINISHED) */
     public Object visitBinaryExpr(BinaryExpr be) {
 		println(be.line + ": Visiting a Binary Expression");
 
@@ -624,37 +591,34 @@ public class TypeChecker extends Visitor {
 		return be.type;
     }
 
-    /** CAST EXPRESSION - OUR CODE HERE (STILL TO COMPLETE) */
-    public Object visitCastExpr(CastExpr ce) {
-		println(ce.line + ": Visiting a cast expression");
-
-		// INSERT CODE HERE
-
-		println(ce.line + ": Cast Expression has type: " + ce.type);
-		return ce.type;
-    }
-
-    /** CONSTRUCTOR (EXPLICIT) INVOCATION - OUR CODE HERE (STILL TO COMPLETE) */
-    public Object visitCInvocation(CInvocation ci) {
-		println(ci.line + ": Visiting an explicit constructor invocation");
-
-		// INSERT CODE HERE
-
-		return null;
-    }
-
-    /** CLASS DECLARATION - OUR CODE HERE (COMPLETE?) */
+    /** CLASS DECLARATION - OUR CODE HERE (FINISHED) */
     public Object visitClassDecl(ClassDecl cd) {
-		println(cd.line + ": Visiting a class declaration");
+		println(cd.line + ": Visiting a class declaration "+ cd.name());
 
 		// INSERT CODE HERE
+		currentClass = cd;
+		for (int i = 0; i < cd.interfaces().nchildren; i++ ){
+			for (int j = i+1; j < cd.interfaces().nchildren; j++){
+
+				String ct1 = ((ClassType)cd.interfaces().children[i]).name().getname();
+				String ct2 = ((ClassType)cd.interfaces().children[j]).name().getname();
+
+				if ( ct1.equals(ct2) ){
+
+					Error.error("Duplicate interface" + ((ClassType)cd.interfaces().children[i]).name());
+
+				}
+
+			}
+		}
+
 		super.visitClassDecl(cd);
 		// - END -
 
 		return null;
     }
 
-    /** CONSTRUCTOR DECLARATION - OUR CODE HERE (COMPLETE) */
+    /** CONSTRUCTOR DECLARATION - OUR CODE HERE (FINISHED) */
     public Object visitConstructorDecl(ConstructorDecl cd) {
 		println(cd.line + ": Visiting a constructor declaration");
 
@@ -666,7 +630,7 @@ public class TypeChecker extends Visitor {
 		return null;
     }
 
-    /** DO STATEMENT - OUR CODE HERE (COMPLETE) */
+    /** DO STATEMENT - OUR CODE HERE (FINISHED) */
     public Object visitDoStat(DoStat ds) {
 		println(ds.line + ": Visiting a do statement");
 
@@ -683,7 +647,7 @@ public class TypeChecker extends Visitor {
 		return null;
     }
 
-    /** FOR STATEMENT - OUR CODE HERE (COMPLETE) */
+    /** FOR STATEMENT - OUR CODE HERE (FINISHED) */
     public Object visitForStat(ForStat fs) {
 		println(fs.line + ": Visiting a for statement");
 
@@ -710,7 +674,7 @@ public class TypeChecker extends Visitor {
 		return null;
     }
 
-    /** IF STATEMENT - OUR CODE HERE (COMPLETE) */
+    /** IF STATEMENT - OUR CODE HERE (FINISHED) */
     public Object visitIfStat(IfStat is) {
 		println(is.line + ": Visiting a if statement");
 
@@ -731,19 +695,11 @@ public class TypeChecker extends Visitor {
 		return null;
     }
 
-    /** INVOCATION - OUR CODE HERE (STILL TO COMPLETE) */
-    public Object visitInvocation(Invocation in) {
-		println(in.line + ": Visiting an Invocation");
-
-		// INSERT CODE HERE
-
-		println(in.line + ": Invocation has type: " + in.type);
-		return in.type;
-    }
-
-    /** LITERAL - OUR CODE HERE (COMPLETE) */
+    /** LITERAL - OUR CODE HERE (FINISHED) */
     public Object visitLiteral(Literal li) {
-		println(li.line + ": Visiting a literal");
+
+
+		println(li.line + ": Visiting a literal (" + li.toString().substring(li.toString().indexOf("= ") + 2) + ")");
 
 		// INSERT CODE HERE
 		if(li.getKind() == Literal.NullKind) {
@@ -758,7 +714,7 @@ public class TypeChecker extends Visitor {
 		return li.type;
     }
 
-    /** METHOD DECLARATION - OUR CODE HERE (COMPLETE) */
+    /** METHOD DECLARATION - OUR CODE HERE (FINISHED) */
     public Object visitMethodDecl(MethodDecl md) {
 		println(md.line + ": Visiting a method declaration");
 		currentContext = md;
@@ -770,7 +726,7 @@ public class TypeChecker extends Visitor {
 		return null;
     }
 
-    /** NAME EXPRESSION - OUR CODE HERE (COMPLETE) */
+    /** NAME EXPRESSION - OUR CODE HERE (FINISHED) */
     public Object visitNameExpr(NameExpr ne) {
 		println(ne.line + ": Visiting a Name Expression");
 
@@ -794,17 +750,7 @@ public class TypeChecker extends Visitor {
 		return ne.type;
     }
 
-    /** NEW - OUR CODE HERE (STILL TO COMPLETE) */
-    public Object visitNew(New ne) {
-		println(ne.line + ": Visiting a new");
-
-		// INSERT CODE HERE
-
-		println(ne.line + ": New has type: " + ne.type);
-		return ne.type;
-    }
-
-    /** STATIC INITIALIZER - OUR CODE HERE (COMPLETE) */
+    /** STATIC INITIALIZER - OUR CODE HERE (FINISHED) */
     public Object visitStaticInitDecl(StaticInitDecl si) {
 		println(si.line + ": Visiting a static initializer");
 
@@ -816,7 +762,7 @@ public class TypeChecker extends Visitor {
 		return null;
     }
 
-    /** SUPER - OUR CODE HERE (COMPLETE) */
+    /** SUPER - OUR CODE HERE (FINISHED) */
     public Object visitSuper(Super su) {
 		println(su.line + ": Visiting a super");
 
@@ -832,16 +778,7 @@ public class TypeChecker extends Visitor {
 		return su.type;
     }
 
-    /** SWITCH STATEMENT - OUR CODE HERE (STILL TO COMPLETE) */
-    public Object visitSwitchStat(SwitchStat ss) {
-		println(ss.line + ": Visiting a Switch statement");
-
-		// INSERT CODE HERE
-
-		return null;
-    }
-
-    /** TERNARY EXPRESSION - OUR CODE HERE (COMPLETE) */
+    /** TERNARY EXPRESSION - OUR CODE HERE (FINISHED) */
     public Object visitTernary(Ternary te) {
 		println(te.line + ": Visiting a ternary expression");
 
@@ -864,7 +801,7 @@ public class TypeChecker extends Visitor {
 		return te.type;
     }
 
-    /** UNARY POST EXPRESSION - OUR CODE HERE (COMPLETE) */
+    /** UNARY POST EXPRESSION - OUR CODE HERE (FINISHED) */
     public Object visitUnaryPostExpr(UnaryPostExpr up) {
 		println(up.line + ": Visiting a unary post expression");
 		Type eType = null;
@@ -887,7 +824,7 @@ public class TypeChecker extends Visitor {
 		return eType;
     }
 
-    /** UNARY PRE EXPRESSION - OUR CODE HERE (COMPLETE) */
+    /** UNARY PRE EXPRESSION - OUR CODE HERE (FINISHED) */
     public Object visitUnaryPreExpr(UnaryPreExpr up) {
 		println(up.line + ": Visiting a unary pre expression");
 
@@ -923,7 +860,7 @@ public class TypeChecker extends Visitor {
 		return up.type;
     }
 
-    /** VAR - OUR CODE HERE (COMPLETE) */
+    /** VAR - OUR CODE HERE (FINISHED) */
     public Object visitVar(Var va) {
 		println(va.line + ": Visiting a var");
 
@@ -940,7 +877,7 @@ public class TypeChecker extends Visitor {
 		return null;
     }
 
-    /** WHILE STATEMENT - OUR CODE HERE (COMPLETE) */
+    /** WHILE STATEMENT - OUR CODE HERE (FINISHED) */
     public Object visitWhileStat(WhileStat ws) {
 		println(ws.line + ": Visiting a while statement"); 
 
@@ -955,6 +892,278 @@ public class TypeChecker extends Visitor {
 		// - END -
 
 		return null;
+    }
+
+/**
+	----------------------------------------------------------------------- TO DO E* & E+
+ */
+
+    /** SWITCH STATEMENT - OUR CODE HERE (STILL TO COMPLETE - E+) */
+    public Object visitSwitchStat(SwitchStat ss) {
+		println(ss.line + ": Visiting a Switch statement");
+
+		// INSERT CODE HERE
+
+		return null;
+    }
+
+    /** ArrayAccessExpr - OUR CODE HERE (STILL TO COMPLETE - E*) */
+    public Object visitArrayAccessExpr(ArrayAccessExpr ae) {
+		println(ae.line + ": Visiting ArrayAccessExpr");
+		// INSERT CODE HERE
+		/**
+			Example)
+			array[0]
+
+			We can check the ArrayAccessExpr.java file and find two paramters (Expression target, Expression index)
+			target[index]
+			- target must be an arrayType
+			- index must be integralType (int, long)
+
+			array's type:
+				if depth == 1	--> base type
+				else 			--> new array type w/ base type of target, but depth ONE less
+		 */
+		return ae.type;
+    }
+
+    /** NewArray - OUR CODE HERE (STILL TO COMPLETE - E*) */
+    public Object visitNewArray(NewArray ne) {
+		println(ne.line + ": Visiting a NewArray " + ne.dimsExpr().nchildren + " " + ne.dims().nchildren);
+		// INSERT CODE HERE
+		/**
+			Example)
+
+		 */
+		println(ne.line + ": NewArray type is " + ne.type);
+		return ne.type;
+    }
+
+/**
+	----------------------------------------------------------------------- TO DO E
+ */
+
+    /** CINVOCATION - OUR CODE HERE (COMPLETE?) */
+    public Object visitCInvocation(CInvocation ci) {
+		println(ci.line + ": Visiting an explicit constructor invocation");
+
+		// INSERT CODE HERE
+
+		// this or super determines the target class 
+		// if this,			current class
+		// if otherwise,	super class
+
+		ClassDecl targetClass;
+
+		if(ci.superConstructorCall()){
+
+			ClassType superClass = currentClass.superClass();
+
+			if(superClass == null){
+				targetClass = null;
+			}else{
+				targetClass = superClass.myDecl;
+			}
+
+		}else{
+
+			targetClass = currentClass;
+
+		}
+
+		if(targetClass == null){
+
+			Error.error(ci, "target class " + currentClass.name() + "does not have super class");
+
+		}
+
+		Sequence inParam = ci.args();
+		Expression inParamExpr = null;
+		Type inParamType;
+
+		int inParamCount = 0;
+		if (inParam != null) { inParamCount = inParam.nchildren; }
+		for(int i = 0; i < inParamCount; i++){
+
+			inParamExpr = (Expression)inParam.children[i];
+			inParamType = (Type)inParamExpr.visit(this);
+
+		}
+
+		ConstructorDecl method = (ConstructorDecl)findMethod(targetClass.constructors, targetClass.name(), ci.args(), false);
+
+		// if findMethod returns null, no method found
+		if(method == null){
+
+			Error.error("No constructor " + targetClass.name() + " found");
+
+		}else if(method == currentContext){
+
+			Error.error("Recursive invocation of constructor " + targetClass.name());
+
+		}
+
+		ci.targetClass = targetClass;
+		ci.constructor = method;
+		// - END -
+
+		return null;
+    }
+
+    /** INVOCATION - OUR CODE HERE (COMPLETE?) */
+    public Object visitInvocation(Invocation in) {
+		println(in.line + ": Visiting an Invocation");
+
+		if(currentClass == null){
+			println(" - - - TESTING - - - ");
+			println("currentClass is null");
+			println(" - - - TESTING END - - - ");			
+		}
+
+		// INSERT CODE HERE
+		ClassDecl targetClass = null;
+		Type targetType;
+		if(in.target() == null){
+
+			// if target is null, then currentClass is the target
+			targetClass = currentClass;
+			targetType = new ClassType(currentClass.className());
+			((ClassType)targetType).myDecl = currentClass;
+
+		}else{ 
+
+			// if target is not null, then visit it
+			targetType = (Type)in.target().visit(this);
+
+			// must be of classType
+			if(targetType instanceof ClassType){
+
+				in.targetType = targetType;
+				targetClass = ((ClassType)targetType).myDecl; //its myDecl is the target class
+
+			}else{
+
+				Error.error(in, in.methodName().getname() + " is not a class type");
+
+			}
+		}
+
+		in.targetType = targetType;
+		Sequence inParam = in.params();
+		Expression inParamExpr = null;
+		Type inParamType;
+
+		int inParamCount = 0;
+		if (inParam != null) { inParamCount = inParam.nchildren; }
+		for(int i = 0; i < inParamCount; i++){
+
+			inParamExpr = (Expression)inParam.children[i];
+			inParamType = (Type)inParamExpr.visit(this);
+
+		}
+
+		MethodDecl method = (MethodDecl)findMethod(targetClass.allMethods, in.methodName().getname(), in.params(), true);
+
+		// if findMethod returns null, no method found
+		if(method == null){
+
+			Error.error("No method " + in.methodName().getname() + " found");
+
+		}else{
+
+			// if findMethod returns something, set it to targetMethod
+			in.targetMethod = method;
+			in.type = method.returnType(); // set to returnType of whatever is returned from findMethod
+
+		}
+
+		// - END -
+		println(in.line + ": Invocation has type: " + in.type);
+		return in.type;
+    }
+
+    /** NEW - OUR CODE HERE (COMPLETE?) */
+    public Object visitNew(New ne) {
+		println(ne.line + ": Visiting a new");
+
+		// INSERT CODE HERE
+
+		/**
+			implicit constructor invocation with target class of whatever is being created
+		 */
+
+		ne.type().visit(this);
+
+		ClassDecl targetClass = ne.type().myDecl;
+		Type targetType = ne.type();
+
+		if(targetClass.isInterface()){
+			Error.error("Interface cannot be invoked" + targetClass.name());
+		}
+
+		Sequence inParam = ne.args();
+		Expression inParamExpr = null;
+		Type inParamType;
+
+		int inParamCount = 0;
+		if (inParam != null) { inParamCount = inParam.nchildren; }
+		for(int i = 0; i < inParamCount; i++){
+
+			inParamExpr = (Expression)inParam.children[i];
+			inParamType = (Type)inParamExpr.visit(this);
+
+		}
+
+		ConstructorDecl method = (ConstructorDecl)findMethod(targetClass.constructors, targetClass.name(), ne.args(), false);
+
+		// if findMethod returns null, no method found
+		if(method == null){
+
+			Error.error("No constructor " + targetClass.name() + " found");
+
+		}
+
+		ne.setConstructorDecl(method);
+		ne.type = targetType;
+		// - END - 
+
+		println(ne.line + ": New has type: " + ne.type);
+		return ne.type;
+    }
+
+    /** CAST EXPRESSION - OUR CODE HERE (COMPLETE?) */
+    public Object visitCastExpr(CastExpr ce) {
+		println(ce.line + ": Visiting a cast expression");
+
+		// INSERT CODE HERE
+		Type exprType = (Type)ce.expr().visit(this);
+		Type castType = ce.type();
+
+		if(exprType.isNumericType() && castType.isNumericType()){
+			ce.type = castType;
+			return castType;
+		}
+
+		if ((ce.expr() instanceof NameExpr) && ((NameExpr)ce.expr()).myDecl instanceof ClassDecl){
+			Error.error(ce,"Cannot use class name for cast");
+		}
+		
+		if (exprType.isClassType() && castType.isClassType()){
+			if (Type.isSuper((ClassType)exprType, (ClassType)castType) || Type.isSuper((ClassType)castType, (ClassType)exprType)) {
+				ce.type = castType;
+				return castType;
+			}
+		}
+
+		if (!exprType.identical(castType)){
+			Error.error("Illegal cast");
+		}
+
+		ce.type = castType;
+		// - END -
+
+		println(ce.line + ": Cast Expression has type: " + ce.type);
+		return ce.type;
     }
 
 }
