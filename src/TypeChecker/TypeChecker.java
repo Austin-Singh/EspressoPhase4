@@ -484,7 +484,7 @@ public class TypeChecker extends Visitor {
 				be.type = new PrimitiveType(PrimitiveType.BooleanKind);
 			}
 			else {
-				Error.error(be, "Operands for " + be.op().operator() + " must be numeric.");
+				Error.error(be, "Operands for '" + be.op().operator() + "' requires operands of numeric type.");
 			}
 			break;
 		}
@@ -507,14 +507,14 @@ public class TypeChecker extends Visitor {
 					be.type = new PrimitiveType(PrimitiveType.BooleanKind);
 				}
 				else {
-					Error.error(be, "Operands for " + be.op().operator() + " cannot be void.");
+					Error.error(be, "Void type cannot be used here.");
 				}
 			}
 			else if (lType.isNumericType() && rType.isNumericType()) {
 				be.type = new PrimitiveType(PrimitiveType.BooleanKind);
 			}
 			else {
-				Error.error(be, "Operands for " + be.op().operator() + " must be identical or numeric.");
+				Error.error(be, "Operands for '" + be.op().operator() + "' requires operands of the same type.");
 			}
 			break;
 		}
@@ -524,7 +524,7 @@ public class TypeChecker extends Visitor {
 				be.type = new PrimitiveType(PrimitiveType.BooleanKind);
 			}
 			else {
-				Error.error(be, "Operands for " + be.op().operator() + " must both be boolean.");
+				Error.error(be, "Operands for '" + be.op().operator() + "' requires operands of boolean type.");
 			}
 			break;
 		}
@@ -538,7 +538,7 @@ public class TypeChecker extends Visitor {
 				be.type = new PrimitiveType(PrimitiveType.ceiling((PrimitiveType)lType, (PrimitiveType)rType));
 			}
 			else {
-				Error.error(be, "Operands for " + be.op().operator() + " must be either boolean or integrals.");
+				Error.error(be, "Operands '" + be.op().operator() + "' requires both operands of either integral or boolean type.");
 			}
 			break;
 		}
@@ -567,7 +567,7 @@ public class TypeChecker extends Visitor {
 				be.type = lType;
 			}
 			else {
-				Error.error(be, "Operands for " + be.op().operator() + " must be integrals.");
+				Error.error(be, "Operands for '" + be.op().operator() + "' requires integral type.");
 			}
 			//if lType == byte, short, or char => change it to int? Nothing tests this? Unsure what he means. Be aware for testing phase.
 			break;
@@ -894,10 +894,6 @@ public class TypeChecker extends Visitor {
 		return null;
     }
 
-/**
-	----------------------------------------------------------------------- TO DO E* & E+
- */
-
     /** SWITCH STATEMENT - OUR CODE HERE (STILL TO COMPLETE - E+) */
     public Object visitSwitchStat(SwitchStat ss) {
 		println(ss.line + ": Visiting a Switch statement");
@@ -931,17 +927,9 @@ public class TypeChecker extends Visitor {
     public Object visitNewArray(NewArray ne) {
 		println(ne.line + ": Visiting a NewArray " + ne.dimsExpr().nchildren + " " + ne.dims().nchildren);
 		// INSERT CODE HERE
-		/**
-			Example)
-
-		 */
 		println(ne.line + ": NewArray type is " + ne.type);
 		return ne.type;
     }
-
-/**
-	----------------------------------------------------------------------- TO DO E
- */
 
     /** CINVOCATION - OUR CODE HERE (COMPLETE?) */
     public Object visitCInvocation(CInvocation ci) {
@@ -977,34 +965,34 @@ public class TypeChecker extends Visitor {
 
 		}
 
-		Sequence inParam = ci.args();
-		Expression inParamExpr = null;
-		Type inParamType;
+		Sequence ciArgs = ci.args();
+		Expression ciArgsExpr = null;
+		Type ciArgsType;
 
 		int inParamCount = 0;
-		if (inParam != null) { inParamCount = inParam.nchildren; }
+		if (ciArgsExpr != null) { inParamCount = ciArgsExpr.nchildren; }
 		for(int i = 0; i < inParamCount; i++){
 
-			inParamExpr = (Expression)inParam.children[i];
-			inParamType = (Type)inParamExpr.visit(this);
+			ciArgsExpr = (Expression)ciArgsExpr.children[i];
+			ciArgsType = (Type)ciArgsExpr.visit(this);
 
 		}
 
 		ConstructorDecl method = (ConstructorDecl)findMethod(targetClass.constructors, targetClass.name(), ci.args(), false);
 
 		// if findMethod returns null, no method found
-		if(method == null){
-
-			Error.error("No constructor " + targetClass.name() + " found");
-
-		}else if(method == currentContext){
+		if(method == currentContext){
 
 			Error.error("Recursive invocation of constructor " + targetClass.name());
 
-		}
+		}else if(method == null){
 
-		ci.targetClass = targetClass;
-		ci.constructor = method;
+			Error.error("No constructor " + targetClass.name() + " found");
+
+		}else{
+			ci.targetClass = targetClass;
+			ci.constructor = method;
+		}
 		// - END -
 
 		return null;
@@ -1014,23 +1002,11 @@ public class TypeChecker extends Visitor {
     public Object visitInvocation(Invocation in) {
 		println(in.line + ": Visiting an Invocation");
 
-		if(currentClass == null){
-			println(" - - - TESTING - - - ");
-			println("currentClass is null");
-			println(" - - - TESTING END - - - ");			
-		}
-
 		// INSERT CODE HERE
 		ClassDecl targetClass = null;
 		Type targetType;
-		if(in.target() == null){
-
-			// if target is null, then currentClass is the target
-			targetClass = currentClass;
-			targetType = new ClassType(currentClass.className());
-			((ClassType)targetType).myDecl = currentClass;
-
-		}else{ 
+		
+		if(in.target() != null){
 
 			// if target is not null, then visit it
 			targetType = (Type)in.target().visit(this);
@@ -1046,15 +1022,24 @@ public class TypeChecker extends Visitor {
 				Error.error(in, in.methodName().getname() + " is not a class type");
 
 			}
+
+		}else{ 
+
+			// if target is null, then currentClass is the target
+			targetClass = currentClass;
+			targetType = new ClassType(currentClass.className());
+			((ClassType)targetType).myDecl = currentClass;
+
 		}
 
 		in.targetType = targetType;
 		Sequence inParam = in.params();
 		Expression inParamExpr = null;
-		Type inParamType;
+		Type inParamType = null;
 
 		int inParamCount = 0;
 		if (inParam != null) { inParamCount = inParam.nchildren; }
+
 		for(int i = 0; i < inParamCount; i++){
 
 			inParamExpr = (Expression)inParam.children[i];
@@ -1065,15 +1050,15 @@ public class TypeChecker extends Visitor {
 		MethodDecl method = (MethodDecl)findMethod(targetClass.allMethods, in.methodName().getname(), in.params(), true);
 
 		// if findMethod returns null, no method found
-		if(method == null){
-
-			Error.error("No method " + in.methodName().getname() + " found");
-
-		}else{
+		if(method != null){
 
 			// if findMethod returns something, set it to targetMethod
 			in.targetMethod = method;
 			in.type = method.returnType(); // set to returnType of whatever is returned from findMethod
+
+		}else{
+
+			Error.error("No method " + in.methodName().getname() + " found");
 
 		}
 
@@ -1087,13 +1072,8 @@ public class TypeChecker extends Visitor {
 		println(ne.line + ": Visiting a new");
 
 		// INSERT CODE HERE
-
-		/**
-			implicit constructor invocation with target class of whatever is being created
-		 */
-
 		ne.type().visit(this);
-
+		
 		ClassDecl targetClass = ne.type().myDecl;
 		Type targetType = ne.type();
 
@@ -1115,16 +1095,12 @@ public class TypeChecker extends Visitor {
 		}
 
 		ConstructorDecl method = (ConstructorDecl)findMethod(targetClass.constructors, targetClass.name(), ne.args(), false);
-
-		// if findMethod returns null, no method found
-		if(method == null){
-
+		if(method != null){
+			ne.setConstructorDecl(method);
+			ne.type = targetType;
+		}else{
 			Error.error("No constructor " + targetClass.name() + " found");
-
 		}
-
-		ne.setConstructorDecl(method);
-		ne.type = targetType;
 		// - END - 
 
 		println(ne.line + ": New has type: " + ne.type);
@@ -1136,30 +1112,40 @@ public class TypeChecker extends Visitor {
 		println(ce.line + ": Visiting a cast expression");
 
 		// INSERT CODE HERE
-		Type exprType = (Type)ce.expr().visit(this);
 		Type castType = ce.type();
-
-		if(exprType.isNumericType() && castType.isNumericType()){
-			ce.type = castType;
-			return castType;
-		}
+		Type exprType = (Type)ce.expr().visit(this);
 
 		if ((ce.expr() instanceof NameExpr) && ((NameExpr)ce.expr()).myDecl instanceof ClassDecl){
+
 			Error.error(ce,"Cannot use class name for cast");
+
 		}
-		
-		if (exprType.isClassType() && castType.isClassType()){
-			if (Type.isSuper((ClassType)exprType, (ClassType)castType) || Type.isSuper((ClassType)castType, (ClassType)exprType)) {
+
+		if(castType.isNumericType() && exprType.isNumericType()){
+
+			ce.type = castType;
+			println(ce.line + ": Cast Expression has type: " + ce.type);
+			return castType;
+
+		}else if (exprType.isClassType() && castType.isClassType()){
+
+			boolean isCastSuper = Type.isSuper((ClassType)exprType, (ClassType)castType);
+			boolean isExprSuper = Type.isSuper((ClassType)castType, (ClassType)exprType);
+			if (isCastSuper || isExprSuper) {
+
 				ce.type = castType;
+				println(ce.line + ": Cast Expression has type: " + ce.type);
 				return castType;
+
 			}
+			
 		}
 
 		if (!exprType.identical(castType)){
-			Error.error("Illegal cast");
+			Error.error("Illegal cast of identical types");
+		}else{
+			ce.type = castType;
 		}
-
-		ce.type = castType;
 		// - END -
 
 		println(ce.line + ": Cast Expression has type: " + ce.type);
