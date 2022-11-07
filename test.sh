@@ -1,58 +1,38 @@
 #!/bin/bash
 
-GOODTESTS="/home/wsl/EspressoPhase4/Tests/Phase4/Espresso/GoodTests/*"
+RED=$(tput setaf 1)
+GREEN=$(tput setaf 2)
+NORMAL=$(tput sgr0)
 
-numOfGood=0
-numOfBad=0
-total=0
+function run_tests {
 
-for f in $GOODTESTS
-do
-        ((total=total+1))
-        echo "Processing $f"
-        ./espressoc $f > me.txt 2> /dev/null
-        ./espressocr $f > ref.txt 2> /dev/null
-        diff -u me.txt ref.txt > diff.txt
-        if [ -s diff.txt ]; then
-                # The file is not-empty.
-                ((numOfBad=numOfBad+1))
-                echo "BAD TEST"
-                cat diff.txt 
-        else
-                # The file is empty.
-                ((numOfGood=numOfGood+1))
-                #echo "GOOD TEST"
-        fi
-done
+        goodResults=0
+        badResults=0
+        total=0
 
-((numOfGood2=numOfGood))
-((numOfBad2=numOfBad))
-((total2=total))
+        for f in $1
+        do
+                ((total=total+1))
+                ./espressoc $f > me.txt 2> /dev/null
+                ./espressocr $f > ref.txt 2> /dev/null
 
-GOODTESTS="/home/wsl/EspressoPhase4/Tests/Phase4/Espresso/BadTests/*"
-numOfGood=0
-numOfBad=0
-total=0
+                diff -u me.txt ref.txt > diff.txt
+                if [ -s diff.txt ]; then
+                        ((badResults=badResults+1))
+                        printf "%-15s %-110s %-15s\n" "Processing ..." $f "${RED}NOT MATCHING${NORMAL} [$total]"
 
-for f in $GOODTESTS
-do
-        ((total=total+1))
-        echo "Processing $f"
-        ./espressoc $f > me.txt 2> /dev/null
-        ./espressocr $f > ref.txt 2> /dev/null
-        diff -u me.txt ref.txt > diff.txt
-        if [ -s diff.txt ]; then
-                # The file is not-empty.
-                ((numOfBad=numOfBad+1))
-                echo "BAD TEST"
-                grep -E '^(\+\/|\-\/)' diff.txt
-                echo ""
-        else
-                # The file is empty.
-                ((numOfGood=numOfGood+1))
-                #echo "GOOD TEST"
-        fi
-done
+                        grep -E '^(\+\/|\-\/)' diff.txt > diff2.txt
+                        cat diff2.txt | sed 's/.*: //'
+                        echo ""
+                else 
+                        ((goodResults=goodResults+1))
+                        printf "%-15s %-110s %-15s\n\n" "Processing ..." $f "${GREEN}MATCHING${NORMAL} [$total]"
+                fi
+        done
 
-echo "$numOfGood2 of $total2 passed. (i.e. didn't pass: $numOfBad2)"
-echo "$numOfGood of $total passed. (i.e. didn't pass: $numOfBad)"
+        printf "Passed Tests: ${GREEN}$goodResults${NORMAL} of $total passed (${RED}$badResults${NORMAL} failed)\n\n"
+}
+
+run_tests "/home/wsl/EspressoPhase4/Tests/Phase4/Espresso/GoodTests/*"
+run_tests "/home/wsl/EspressoPhase4/Tests/Phase4/Espresso/BadTests/*"
+
