@@ -558,6 +558,11 @@ public class TypeChecker extends Visitor {
 			else {
 				Error.error(be, "Operands for " + be.op().operator() + " must be numeric.");
 			}
+			
+			if(be.type == null) {
+				Error.error(be, "Operands for " + be.op().operator() + " must be numeric.");
+			}
+			
 			break;
 		}
 		case BinOp.LSHIFT:
@@ -579,6 +584,10 @@ public class TypeChecker extends Visitor {
 			
 			if(!lType.isClassType()) {
 				Error.error(be, "Left side of " + be.op().operator() + " must be a class type.");
+			}
+			
+			if(!(classTable.get(((NameExpr)be.left()).name().getname()) == null)) {
+				Error.error(be, "Left hand side of " + be.op().operator() + " cannot be a class.");
 			}
 			
 			be.type = new PrimitiveType(PrimitiveType.BooleanKind);
